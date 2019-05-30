@@ -170,22 +170,22 @@ def gaussianMixture(img,components=4):
                             
 
 if __name__ == "__main__":
-    [vol,unit] = getNiftiObject('D:/POROSITY/E5_0p5.nii')
+    [vol,unit] = getNiftiObject("filename")
 
-    val = filters.threshold_otsu(vol); #calcula um limiar apenas para separar o que é ruído de fundo e o que é imagem
-    r_approx,bbox = getRadiusBbox(vol[:,:,0],val);    # metodo para calcular o raio aproximado da amostra
+    val = filters.threshold_otsu(vol); # threshold to segment the background
+    r_approx,bbox = getRadiusBbox(vol[:,:,0],val);    # gets a approximated radius of the sample 
     [xmin,ymin,xmax,ymax] = bbox;
     i_0 = int(xmin+r_approx);
     j_0 = int(ymin+r_approx);
     s = int(r_approx/2.0);
-    params = gaussianMixture(vol[i_0-s:i_0+s,j_0-s:j_0+s,:],4); #faz o fitting apenas para a região que temos dados (não o fundo)
-    print(params[0],params[9]) # parametros das gaussianas principais
+    params = gaussianMixture(vol[i_0-s:i_0+s,j_0-s:j_0+s,:],4); # gaussian mixture fitting of the histogram
+    print(params[0],params[9]) 
     segmented = vol.copy();
-    [i_s,j_s,k_s] = np.where(vol>=params[9]); # segmenta a região solida
+    [i_s,j_s,k_s] = np.where(vol>=params[9]); # solid region
     segmented[i_s,j_s,k_s]=255;
-    [i_p,j_p,k_p] = np.where(vol<=params[0]); # segmenta a região vazia
+    [i_p,j_p,k_p] = np.where(vol<=params[0]); # empty region
     segmented[i_p,j_p,k_p]=0;
-    segmented = blockSeg(vol,segmented,3,5,params[9]-(4*params[10]),params[0]+(4*params[1]),255,0) # segmentacao por histerese modificada    
+    segmented = blockSeg(vol,segmented,3,5,params[9]-(4*params[10]),params[0]+(4*params[1]),255,0) # modified histereses     
     plt.figure();
     plt.imshow(vol[:,:,10], cmap="gray");
     plt.figure();
@@ -197,7 +197,7 @@ if __name__ == "__main__":
 
     vol_treated = np.zeros(vol.shape)
     for z in (range(segmented.shape[2])):
-        vol_treated[:,:,z] = rmvbckSlice(segmented[:,:,z],val,r_approx,-1); #usa uma flag=-1 para identificar a região de fundo (background)
+        vol_treated[:,:,z] = rmvbckSlice(segmented[:,:,z],val,r_approx,-1); #flag -1 for background
         
     vol_tot = np.sum(vol_treated>=0);  
     vol_poros = np.sum(vol_treated==0);
@@ -215,7 +215,7 @@ if __name__ == "__main__":
                         phi += 1.0;
                         vol_final[i,j,k] = 1;
                     elif (I < Esolid and I>=Evoid) :
-                        phi_voxel = 1-((vol_treated[i,j,k] - Evoid)/(Esolid-Evoid)); #calcula a porosidade intermediaria
+                        phi_voxel = 1-((vol_treated[i,j,k] - Evoid)/(Esolid-Evoid)); # intermediate porosity
                         phi += phi_voxel; 
                         vol_final[i,j,k] =  phi_voxel;
                     else:
@@ -229,9 +229,9 @@ if __name__ == "__main__":
     plt.figure();
     plt.imshow(vol_final[:,:,10]);
     plt.show();
-    saveNiftiObject(vol_final,unit,"D:/Porosity/teste.nii")
+    saveNiftiObject(vol_final,unit,"filename")
 
-#Rotina para salvar .nhdr:
+#save .nhdr:
     # dp=vol_final.dtype;
     # import sys
     # native_byte = sys.byteorder
