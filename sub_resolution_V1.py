@@ -191,7 +191,7 @@ if __name__ == "__main__":
     [vol,unit] = getNiftiObject("filename")
 
     val = filters.threshold_otsu(vol); # threshold to segment the background
-    r_approx,bbox = getRadiusBbox(vol[:,:,0],val);    # gets a approximated radius of the sample 
+    r_approx,bbox = getRadiusBbox(vol[:,:,0],val);    # gets an approximated radius of the sample 
     [xmin,ymin,xmax,ymax] = bbox;
     i_0 = int(xmin+r_approx);
     j_0 = int(ymin+r_approx);
