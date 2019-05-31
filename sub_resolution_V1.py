@@ -189,7 +189,8 @@ def gaussianMixture(img,components=4):
 
 if __name__ == "__main__":
     [vol,unit] = getNiftiObject("filename")
-
+    vol = histogram_normalization(vol,255,0)
+    vol = vol[:,:,50:vol.shape[2]-50];
     val = filters.threshold_otsu(vol); # threshold to segment the background
     r_approx,bbox = getRadiusBbox(vol[:,:,0],val);    # gets an approximated radius of the sample 
     [xmin,ymin,xmax,ymax] = bbox;
@@ -203,7 +204,7 @@ if __name__ == "__main__":
     segmented[i_s,j_s,k_s]=255;
     [i_p,j_p,k_p] = np.where(vol<=params[0]); # empty region
     segmented[i_p,j_p,k_p]=0;
-    segmented = blockSeg(vol,segmented,3,5,params[9]-(4*params[10]),params[0]+(4*params[1]),255,0) # modified histereses     
+    segmented = blockSeg(vol,segmented,2,5,params[9]-(4*params[10]),params[0]+(4*params[1]),255,0) # modified hysteresis     
     plt.figure();
     plt.imshow(vol[:,:,10], cmap="gray");
     plt.figure();
@@ -213,6 +214,7 @@ if __name__ == "__main__":
     plt.hist(vol[segmented==0],bins=50);
     plt.show();     
 
+    #Optional step to tag the background. This works only for cylindrical samples 
     vol_treated = np.zeros(vol.shape)
     for z in (range(segmented.shape[2])):
         vol_treated[:,:,z] = rmvbckSlice(segmented[:,:,z],val,r_approx,-1); #flag -1 for background
@@ -247,7 +249,7 @@ if __name__ == "__main__":
     plt.figure();
     plt.imshow(vol_final[:,:,10]);
     plt.show();
-    saveNiftiObject(vol_final,unit,"filename")
+    saveNiftiObject(vol_final,unit,'filename')
 
 #save .nhdr:
     # dp=vol_final.dtype;
