@@ -80,7 +80,8 @@ def radiusMap(porosity_matrix,mask,unit):
 	dt = bwt(macropores)
 	map_radius = r_eq+ (dt*unit);
 	aux = (dt<1.5)*mask * (unit**2);	
-	map_surface = aux+surface;
+	surface_contact = aux*intermediate;
+	map_surface = surface_contact+surface;
 	return map_radius,map_surface;
 
 	
