@@ -75,7 +75,7 @@ def radiusMap(porosity_matrix,mask,unit):
 	intermediate[macropores==1]=0;
 	v = intermediate* (unit**3) *(3.0/(4.0*np.pi));
 	r_eq = np.cbrt(v)
-	surface = np.sqrt( intermediate* (unit**2) *(1/np.pi)) ;
+	surface = (r_eq**2)*np.pi ;
 	from scipy.ndimage.morphology import distance_transform_edt as bwt
 	dt = bwt(macropores)
 	map_radius = r_eq+ (dt*unit);
