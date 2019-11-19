@@ -42,7 +42,7 @@ def histogram_normalization(img):
 		# p = np.where(h>cutoff);
 		# min_intensity = intensity[p[0][0]];
 		# max_intensity = intensity[p[0][-1]];	
-		p2, p98 = np.percentile(img[:,:,z], (2, 98))
+		p2, p98 = np.percentile(img[:,:,z], (2, 99))
 		img[:,:,z] = skimage.exposure.rescale_intensity(img[:,:,z], in_range=(p2, p98), out_range=(0,255));
 	return img;
 
@@ -62,10 +62,16 @@ def createMask(filtered):
 	y=int(y[0]);
 	z = int(filtered.shape[2]/2.0);
 	radius = int(radius/2.0);
-	obs = filtered[:,:,100:500].copy();
-	mobs = mask[:,:,100:500].copy()
-	mobs = mobs==1;
-	obs = obs[mobs].flatten()
+	# obs = filtered[:,:,100:500].copy();
+	# mobs = mask[:,:,100:500].copy()
+	# mobs = mobs==1;
+	# obs = obs[mobs].flatten()
+	masked = filtered*mask;
+	obs = np.zeros([filtered.shape[0],filtered.shape[1],60])
+	obs[:,:,:20] = masked[:,:,:20]
+	obs[:,:,20:40] = masked[:,:,z-10:z+10]
+	obs[:,:,40:60] = masked[:,:,filtered.shape[2]-20:filtered.shape[2]]
+	obs = obs[obs>0]	
 	return mask,obs;
 
 def plot3d(image3d,precision,clr,opt):
@@ -86,15 +92,15 @@ def plot_img_and_hist(img, bins=256):
 	plt.show();
 	return np.max(np.where(img_cdf<0.5))	
 
-def showData(img,filtered,segmented):
+def showData(img,filtered,segmented,pos=100):
 	plt.show();
 	plt.figure();
 	plt.subplot(2,3,1);
-	plt.imshow(img[:,:,100],cmap='gray');
+	plt.imshow(img[:,:,pos],cmap='gray');
 	plt.subplot(2,3,2);
-	plt.imshow(filtered[:,:,100],cmap='gray');
+	plt.imshow(filtered[:,:,pos],cmap='gray');
 	plt.subplot(2,3,3);
-	plt.imshow(segmented[:,:,100],cmap='gray');
+	plt.imshow(segmented[:,:,pos],cmap='gray');
 	plt.subplot(2,3,4);
 	plt.hist(img.flatten(),bins=100);
 	plt.subplot(2,3,5);
@@ -102,3 +108,26 @@ def showData(img,filtered,segmented):
 	plt.subplot(2,3,6);
 	plt.hist(segmented.flatten(),bins=100);	
 	plt.show();
+	
+def showData2(img,filtered,segmented,pos=100):
+	plt.show();
+	plt.figure();
+	plt.subplot(2,3,1);
+	plt.imshow(img[:,:,pos],cmap='gray');
+	plt.subplot(2,3,2);
+	plt.imshow(filtered[:,:,pos]);
+	plt.subplot(2,3,3);
+	plt.imshow(segmented[:,:,pos]);
+	plt.subplot(2,3,4);
+	data = img.flatten();
+	data = data[data>0];
+	plt.hist(data,bins=100);
+	plt.subplot(2,3,5);
+	data = filtered.flatten();
+	data = data[data>0];		
+	plt.hist(data,bins=100);
+	data = segmented.flatten();
+	data = data[data>0];
+	plt.subplot(2,3,6);
+	plt.hist(data,bins=100);	
+	plt.show();	

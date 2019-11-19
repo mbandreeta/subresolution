@@ -33,7 +33,7 @@ def createMap(sigma,filtered):
 	res[0:q.size]=q[:]
 	#plt.plot(res);plt.show();
 	mu_map =list();
-	for eta in tqdm.tqdm(range(0,256)):
+	for eta in (range(0,256)):
 		params= list([eta,sigma,np.max(res)]);
 		f_eta_mu = gaussn(x,*params)
 		f_mu_eta = f_eta_mu*res/y;
@@ -45,7 +45,7 @@ def correctValues(sigma,filtered):
 	mu_map = createMap(sigma,filtered)
 	f = filtered.copy();
 	nx,ny,nz = f.shape;
-	for i in tqdm.tqdm(range(nx)):
+	for i in (range(nx)):
 		for j in range(ny):
 			for k in range(nz):
 				f[i,j,k] = mu_map[int(f[i,j,k])];
